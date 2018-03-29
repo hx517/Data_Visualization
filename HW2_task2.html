@@ -1,0 +1,446 @@
+//https://jsbin.com/colupah/edit?html,css,js,output
+//https://gist.github.com/hx517/9f932e61e4d03de42150164fad5c55e6
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.3/d3.min.js"></script>
+<script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+  <meta name="viewport" content="width=device-width">
+  <title>JS Bin</title>
+<style id="jsbin-css">
+body { font: 12px Arial;}
+path { 
+    stroke: black;
+    stroke-width: 2;
+    fill: none;
+}
+.axis path,
+.axis line {
+    fill: none;
+    stroke: grey;
+    stroke-width: 1;
+    shape-rendering: crispEdges;
+}
+div.tooltip {	
+    position: absolute;			
+    text-align: center;			
+    width: 110px;					
+    height: 140px;					
+    padding: 2px;				
+    font: 12px sans-serif;		
+    background: lightsteelblue;	
+    border: 0px;		
+    border-radius: 8px;			
+    pointer-events: none;			
+}
+</style>
+</head>
+<body>
+  <div id="chart">
+      <svg width="1000" height="1000"></svg>
+  </div>
+<script id="jsbin-javascript">
+d3.csv("https://raw.githubusercontent.com/hx517/Data_Visualization/master/HW2/allCD.csv", 
+       function(CD) {
+  var data = CD.map(function (row, i){
+    return [row.CD,
+           row.BldgArea];});
+  NewPlot (data);
+  console.log(data);
+});
+function NewPlot (data) {
+  var svg = d3.select("svg");
+  var g = svg.append("g");
+  
+  // plotting the dots
+  g.selectAll("circle")
+  .data(data)
+  .enter()
+    .append('circle')
+    .attr('class', 'circle')
+    .attr('cx', function(d,i) {return 70+d[1]/5;})
+    .attr('cy', function(d,i) {return 315+d[0]/5;})
+    .attr('r', 5)
+    .attr('fill',"Blue");
+  
+  // plotting X axis
+  var xScale = d3.scaleLinear()
+    .domain([0,800])
+    .range([20,800]);
+  var xAxis = d3.axisBottom();
+  xAxis.scale(xScale)
+     .ticks(10);
+  svg.append("g")
+    .attr("transform", "translate(40, 440)")
+    .call(xAxis);
+  
+  // plotting Y axis
+  var yScale = d3.scaleLinear()
+      .domain([200, 0])
+      .range([0, 200])
+  var yAxis = d3.axisLeft();
+  yAxis.scale(yScale)
+       .ticks(6);
+  svg.append("g")
+     .attr("transform", "translate(60, 240)")
+     .call(yAxis);
+  
+// //plotting ceiling for aesthetics
+// var cScale = d3.scaleLinear()
+//    .domain([0,180])
+//    .range([10,800]);
+// var ceiling = d3.axisTop();
+// ceiling.scale(cScale)
+//        .ticks(0);
+// svg.append("g")
+//    .attr("transform", "translate(40, 185)")
+//    .call(ceiling);
+  
+//  //plotting right wall for aesthetics
+//  var rScale = d3.scaleLinear()
+//     .domain([600, 0])
+//     .range([135, 710]);
+//  var right = d3.axisRight();
+//  right.scale(rScale)
+//         .ticks(0);
+//  svg.append("g")
+//     .attr("transform", "translate(840, 50)")
+//     .call(right);
+//  
+  // text label for the x axis
+  g.append("text")      
+        .attr("x", 400 )
+        .attr("y", 470 )
+        .style("text-anchor", "middle")
+        .style("font", "15px time")
+        .attr("font-weight", "bold")
+        .text("total building area (sf per community district)");
+  
+  // text label for the y axis
+  g.append("text")      
+        .attr("x", -425 )
+        .attr("y", 20 )
+        .style("text-anchor", "middle")
+        .attr("transform", "rotate(-90)")
+        .style("font", "15px time")
+        .attr("font-weight", "bold")
+        .text("assessd total value($)");
+  
+  //adding chart title
+g.append("text")
+        .attr("x", 440 )             
+        .attr("y", 160)
+        .attr("text-anchor", "middle")  
+        .style("font-size", "30px") 
+        .text("Relationship Between the Assessed Value of Property");
+              
+ g.append("text")
+        .attr("x", 440 )             
+        .attr("y", 195)
+        .attr("text-anchor", "middle")  
+        .style("font-size", "30px") 
+        .text("and the Square Footage of Various Kinds of Property in NYC");
+  
+  // adding vertical auxiliary referencing line 
+  g.selectAll("line")
+   .data([1,2,3,4,5,6,7,8])
+   .enter().append("line")
+   .attr("x1",function (d,i) {return 158 + 98*i;})  
+   .attr("y1",240)  
+   .attr("x2",function (d,i) {return 158 + 98*i;})  
+   .attr("y2",460)
+   .attr("stroke","lightgray")  
+   .attr("stroke-width",1.5);
+  
+  // adding hrizontal auxiliary referencing line
+  g.selectAll("line1")
+   .data([1,2,3,4,5])
+   .enter().append("line")
+   .attr("x1",60)
+   .attr("y1",function (d,i) {return 241 + 50*i;})  
+   .attr("x2",840)
+   .attr("y2",function (d,i) {return 241 + 50*i;})  
+   .attr("stroke","lightgray")  
+   .attr("stroke-width",1.5);
+  
+  // plotting the regression function
+  g.append("line")
+   .attr("x1", 60)
+   .attr("y1", 415)
+   .attr("x2", 800)
+   .attr("y2", 350)
+   .attr("stroke","red")  
+   .attr("stroke-width",2);
+  
+  // adding legends
+  g.append("rect")
+   .attr("fill", "white")
+   .attr("x", 650)
+   .attr("y", 230)
+   .attr("width", 180)
+   .attr("height", 80)
+   .attr("stroke", "black")
+   .attr("stroke-width", 2);
+  
+  g.append("line")
+   .attr("x1", 660)
+   .attr("y1", 250)
+   .attr("x2", 700)
+   .attr("y2", 250)
+   .attr("stroke","red")  
+   .attr("stroke-width",2);
+   
+  g.append("text")
+        .attr("x", 765)             
+        .attr("y", 255)
+        .attr("text-anchor", "middle")  
+        .style("font-size", "14px") 
+        .text("Linear Regression");
+  
+  g.append("circle")
+   .attr("fill", "blue")
+   .attr("cx",680)
+   .attr("cy",286)
+   .attr("r", 5);
+  
+  g.append("text")
+        .attr("x", 765)             
+        .attr("y", 289)
+        .attr("text-anchor", "middle")  
+        .style("font-size", "14px") 
+        .text("Real Observation");
+  
+  // adding caption
+   g.append("text")      
+        .attr("x", 450 )
+        .attr("y", 530 )
+        .style("text-anchor", "middle")
+        .style("font", "16px time")
+        .attr("font-weight", "bold")
+        .text("Figure 1: Scatter ploting the relationship between the assessed value of property in a community"); 
+  
+    g.append("text")      
+   .attr("x", 450 )
+   .attr("y", 550 )
+   .style("text-anchor", "middle")
+   .style("font", "16px time")
+   .attr("font-weight", "bold").text("district and the square footage of total building area  of property in new york city.");
+}
+</script>
+
+
+<script id="jsbin-source-css" type="text/css">body { font: 12px Arial;}
+path { 
+    stroke: black;
+    stroke-width: 2;
+    fill: none;
+}
+.axis path,
+.axis line {
+    fill: none;
+    stroke: grey;
+    stroke-width: 1;
+    shape-rendering: crispEdges;
+}
+div.tooltip {	
+    position: absolute;			
+    text-align: center;			
+    width: 110px;					
+    height: 140px;					
+    padding: 2px;				
+    font: 12px sans-serif;		
+    background: lightsteelblue;	
+    border: 0px;		
+    border-radius: 8px;			
+    pointer-events: none;			
+}</script>
+
+<script id="jsbin-source-javascript" type="text/javascript">d3.csv("https://raw.githubusercontent.com/hx517/Data_Visualization/master/HW2/allCD.csv", 
+       function(CD) {
+  var data = CD.map(function (row, i){
+    return [row.CD,
+           row.BldgArea];});
+  NewPlot (data);
+  console.log(data);
+});
+function NewPlot (data) {
+  var svg = d3.select("svg");
+  var g = svg.append("g");
+  
+  // plotting the dots
+  g.selectAll("circle")
+  .data(data)
+  .enter()
+    .append('circle')
+    .attr('class', 'circle')
+    .attr('cx', function(d,i) {return 70+d[1]/5;})
+    .attr('cy', function(d,i) {return 315+d[0]/5;})
+    .attr('r', 5)
+    .attr('fill',"Blue");
+  
+  // plotting X axis
+  var xScale = d3.scaleLinear()
+    .domain([0,800])
+    .range([20,800]);
+  var xAxis = d3.axisBottom();
+  xAxis.scale(xScale)
+     .ticks(10);
+  svg.append("g")
+    .attr("transform", "translate(40, 440)")
+    .call(xAxis);
+  
+  // plotting Y axis
+  var yScale = d3.scaleLinear()
+      .domain([200, 0])
+      .range([0, 200])
+  var yAxis = d3.axisLeft();
+  yAxis.scale(yScale)
+       .ticks(6);
+  svg.append("g")
+     .attr("transform", "translate(60, 240)")
+     .call(yAxis);
+  
+// //plotting ceiling for aesthetics
+// var cScale = d3.scaleLinear()
+//    .domain([0,180])
+//    .range([10,800]);
+// var ceiling = d3.axisTop();
+// ceiling.scale(cScale)
+//        .ticks(0);
+// svg.append("g")
+//    .attr("transform", "translate(40, 185)")
+//    .call(ceiling);
+  
+//  //plotting right wall for aesthetics
+//  var rScale = d3.scaleLinear()
+//     .domain([600, 0])
+//     .range([135, 710]);
+//  var right = d3.axisRight();
+//  right.scale(rScale)
+//         .ticks(0);
+//  svg.append("g")
+//     .attr("transform", "translate(840, 50)")
+//     .call(right);
+//  
+  // text label for the x axis
+  g.append("text")      
+        .attr("x", 400 )
+        .attr("y", 470 )
+        .style("text-anchor", "middle")
+        .style("font", "15px time")
+        .attr("font-weight", "bold")
+        .text("total building area (sf per community district)");
+  
+  // text label for the y axis
+  g.append("text")      
+        .attr("x", -425 )
+        .attr("y", 20 )
+        .style("text-anchor", "middle")
+        .attr("transform", "rotate(-90)")
+        .style("font", "15px time")
+        .attr("font-weight", "bold")
+        .text("assessd total value($)");
+  
+  //adding chart title
+g.append("text")
+        .attr("x", 440 )             
+        .attr("y", 160)
+        .attr("text-anchor", "middle")  
+        .style("font-size", "30px") 
+        .text("Relationship Between the Assessed Value of Property");
+              
+ g.append("text")
+        .attr("x", 440 )             
+        .attr("y", 195)
+        .attr("text-anchor", "middle")  
+        .style("font-size", "30px") 
+        .text("and the Square Footage of Various Kinds of Property in NYC");
+  
+  // adding vertical auxiliary referencing line 
+  g.selectAll("line")
+   .data([1,2,3,4,5,6,7,8])
+   .enter().append("line")
+   .attr("x1",function (d,i) {return 158 + 98*i;})  
+   .attr("y1",240)  
+   .attr("x2",function (d,i) {return 158 + 98*i;})  
+   .attr("y2",460)
+   .attr("stroke","lightgray")  
+   .attr("stroke-width",1.5);
+  
+  // adding hrizontal auxiliary referencing line
+  g.selectAll("line1")
+   .data([1,2,3,4,5])
+   .enter().append("line")
+   .attr("x1",60)
+   .attr("y1",function (d,i) {return 241 + 50*i;})  
+   .attr("x2",840)
+   .attr("y2",function (d,i) {return 241 + 50*i;})  
+   .attr("stroke","lightgray")  
+   .attr("stroke-width",1.5);
+  
+  // plotting the regression function
+  g.append("line")
+   .attr("x1", 60)
+   .attr("y1", 415)
+   .attr("x2", 800)
+   .attr("y2", 350)
+   .attr("stroke","red")  
+   .attr("stroke-width",2);
+  
+  // adding legends
+  g.append("rect")
+   .attr("fill", "white")
+   .attr("x", 650)
+   .attr("y", 230)
+   .attr("width", 180)
+   .attr("height", 80)
+   .attr("stroke", "black")
+   .attr("stroke-width", 2);
+  
+  g.append("line")
+   .attr("x1", 660)
+   .attr("y1", 250)
+   .attr("x2", 700)
+   .attr("y2", 250)
+   .attr("stroke","red")  
+   .attr("stroke-width",2);
+   
+  g.append("text")
+        .attr("x", 765)             
+        .attr("y", 255)
+        .attr("text-anchor", "middle")  
+        .style("font-size", "14px") 
+        .text("Linear Regression");
+  
+  g.append("circle")
+   .attr("fill", "blue")
+   .attr("cx",680)
+   .attr("cy",286)
+   .attr("r", 5);
+  
+  g.append("text")
+        .attr("x", 765)             
+        .attr("y", 289)
+        .attr("text-anchor", "middle")  
+        .style("font-size", "14px") 
+        .text("Real Observation");
+  
+  // adding caption
+   g.append("text")      
+        .attr("x", 450 )
+        .attr("y", 530 )
+        .style("text-anchor", "middle")
+        .style("font", "16px time")
+        .attr("font-weight", "bold")
+        .text("Figure 1: Scatter ploting the relationship between the assessed value of property in a community"); 
+  
+    g.append("text")      
+   .attr("x", 450 )
+   .attr("y", 550 )
+   .style("text-anchor", "middle")
+   .style("font", "16px time")
+   .attr("font-weight", "bold").text("district and the square footage of total building area  of property in new york city.");
+}</script></body>
+</html>
