@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>JS Bin</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.3/d3.min.js"></script>
+  <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+<style id="jsbin-css">
+.bar {
+  fill: lightgrey;
+  stroke: black;
+}
+.bar:hover {
+  fill: steelblue;
+}
+.axis {
+  font-family: Helvetica;
+  font-size: 14px;
+}
+.axis--x path {
+  display: none;
+}
+.axis--y path {
+  display: none;
+}
+.grid line {
+  stroke: lightgrey;
+  stroke-opacity: 0.7;
+}
+.label {
+  fill: black;
+  font-family: Helvetica;
+  font-size: 14px;
+  text-anchor: middle;
+}
+.axis--map--caption {
+  fill: black;
+  font-family: Helvetica;
+  font-size: 12px;
+  text-anchor: start;
+  font-weight: bold;
+}
+.zipcode {
+  stroke: black;
+	stroke-width: 1px;
+	fill: none;
+}
+</style>
+</head>
+<body>
+<div id="chart">
+  <svg width="1200" height="650">
+  </svg>
+</div>
+<script id="jsbin-javascript">
+var ZIPCODE_URL = "https://raw.githubusercontent.com/hvo/datasets/master/nyc_zip.geojson";
+var RES_BY_CUISINE_URL = "https://raw.githubusercontent.com/hvo/datasets/master/nyc_restaurants_by_cuisine.json";
+d3.queue()
+  .defer(d3.json, ZIPCODE_URL)
+  .defer(d3.json, RES_BY_CUISINE_URL)
+  .await(createPlot);
+function createPlot(error, zipcodes, byCuisine) {
+  var svg    = d3.select("svg"),
+      gChart = svg.append("g"),
+      gMap   = svg.append("g")
+                  .attr("transform", "translate(550, 0)");
+  createMap(gMap, zipcodes, byCuisine[0]);
+  createChart(gChart, gMap, byCuisine);
+}
+function createChart(g, gMap, byCuisine) {
+  let data     = byCuisine.map(d => [d.cuisine, d.total])
+                          .slice(0, 25),
+      maxValue = d3.max(data, d => d[1]),
+      x        = d3.scaleLinear()
+                   .domain([0, maxValue])
+                   .rangeRound([0, 300]),
+      yb       = d3.scaleBand()
+                   .domain(data.map(d => d[0]))
+                   .rangeRound([50, 600]),
+      cHeight  = yb(data.slice(-1)[0][0])-yb.bandwidth();
+ 
+  g.append("g")
+    .attr("class", "axis axis--x")
+    .attr("transform", "translate(165,50)")
+    .call(d3.axisTop(x).ticks(5));
+  g.append("g")
+    .attr("class", "axis axis--y")
+    .attr("transform", "translate(160,0)")
+    .call(d3.axisLeft(yb));  
+  
+  g.append("g")
+    .attr("class", "grid axis--x")
+    .attr("transform", "translate(165,50)")   
+    .call(d3.axisTop(x).ticks(5).tickSize(-cHeight).tickFormat(""));
+  g.append("g")
+    .attr("class", "axis axis--x")
+    .attr("transform", `translate(165,${50+cHeight})`)
+    .call(d3.axisBottom(x).ticks(5))
+    .append("text")
+      .attr("class", "label")
+      .attr("x", 150)
+      .attr("y", 40)
+      .text("Number of Restaurants");
+  g.selectAll(".bar")
+    .data(data)
+    .enter().append("rect")
+      .attr("class", "bar")
+      .attr("x", 165)
+      .attr("y", function(d,i) { return yb(d[0]); })
+      .attr("width", function(d,i) { return x(d[1]); })
+      .attr("height", yb.bandwidth()-2)
+      .on("mouseover", function(d, i) {
+        d3.select(this)
+          .transition().duration(300)
+          .attr("x", 165-10)
+          .attr("y", yb(d[0])-2)
+          .attr("width", x(d[1])+20)
+          .attr("height", yb.bandwidth()+2);
+        updateMap(gMap, byCuisine[i].perZip, byCuisine[i].cuisine);
+      })
+      .on("mouseout", function(d) { 
+        d3.select(this)
+          .transition().duration(300)
+          .attr("x", 165)
+          .attr("y", yb(d[0]))
+          .attr("width", x(d[1]))
+          .attr("height", yb.bandwidth()-2);
+      });  
+}
+function createMap(g, zipcodes, byCuisine) {
+  let canvasSize = [650, 650],
+      projection = d3.geoMercator()
+                     .scale(Math.pow(2, 16)) // 5.34
+                     .center([-73.975, 40.7])
+                     .translate([canvasSize[0]/2, canvasSize[1]/2]),
+      path       = d3.geoPath()
+                     .projection(projection);
+  g.selectAll(".zipcode")
+    .data(zipcodes.features)
+    .enter().append("path")
+      .attr("class", "zipcode")
+      .attr("d", path);
+  g.append("g")
+    .attr("class", "legend")
+    .attr("transform", "translate(0,40)")
+    .append("text")
+    .attr("class", "axis--map--caption")
+    .attr("y", -6);
+  updateMap(g, byCuisine.perZip, byCuisine.cuisine);
+}
+function updateMap(g, counts, label) {
+  let data     = Object.entries(counts),
+      maxCount = d3.max(data, d => d[1]),
+      steps    = 5,
+      color    = d3.scaleThreshold()
+                   .domain(d3.range(0, maxCount, maxCount/steps))
+                   .range(d3.schemeBlues[steps])
+      zipcodes = g.selectAll(".zipcode")
+                   .data(data, d => (d[0]?d[0]:d.properties.zipcode)),
+      x        = d3.scaleLinear()
+                   .domain([0, maxCount])
+                   .rangeRound([50, 300]),
+      legend   = d3.select(".legend");
+  zipcodes
+    .transition().duration(300)
+    .style("fill", d => color(d[1]));
+  
+  zipcodes.exit()
+    .transition().duration(300)
+    .style("fill", "none");
+  
+  let boxes = legend.selectAll("rect")
+    .data(color.range().map(function(d) {
+        d = color.invertExtent(d);
+        if (d[0]==null) d[0] = x.domain()[0];
+        if (d[1]==null) d[1] = x.domain()[1];
+        return d;
+      }));
+  boxes
+    .enter().append("rect")
+    .merge(boxes)
+      .attr("height", 6)
+      .attr("x", d => x(d[0]))
+      .attr("width", d => (x(d[1]) - x(d[0])))
+      .attr("fill", d => color(d[0]));
+  legend.call(d3.axisBottom(x)
+      .ticks(steps, "s")
+      .tickSize(10,0)
+      .tickValues(color.domain()))
+    .select(".domain")
+      .remove();
+  
+  legend.select(".axis--map--caption")
+    .attr("x", x.range()[0])
+    .text(`Number of ${label} Restaurants`);
+}
+</script>
+</body>
+</html>
