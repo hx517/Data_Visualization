@@ -1,0 +1,37 @@
+  //https://gist.github.com/hx517/3ed2a4c0c09a721f39dfdf22b352c3e4
+  
+  <!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>JS Bin</title>
+</head>
+<body>
+<div id="firstSection"></div>
+  <div id="secondSection"></div>
+<div id="finalSection">
+  the final
+</div>  
+
+<script id="jsbin-javascript">
+var sec1 =
+    document.getElementById("firstSection");
+var myHeading =
+    document.createElement("h1");
+myHeading.appendChild(document.createTextNode("Lab 2"));
+sec1.appendChild(myHeading);
+sec1.appendChild(document.createElement("p").appendChild(document.createTextNode(new Date())));
+var sec2 =
+    document.getElementById("secondSection");
+var h2 = document.createElement("h2");
+h2.appendChild(document.createTextNode("Data Visualization"));
+sec2.appendChild(h2);
+var img = document.createElement("img");
+sec2.appendChild(img);
+img.setAttribute("src",
+                "http://cusp.nyu.edu/wp-content/themes/cusp/images/CUSP_long_color.jpg");
+img.setAttribute("width","200");
+</script>
+</body>
+</html>
