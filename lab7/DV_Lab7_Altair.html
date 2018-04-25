@@ -1,0 +1,41 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    .vega-actions a {
+        margin-right: 12px;
+        color: #757575;
+        font-weight: normal;
+        font-size: 13px;
+    }
+    .error {
+        color: red;
+    }
+  </style>
+
+<script src="https://cdn.jsdelivr.net/npm//vega@3.2"></script>
+<script src="https://cdn.jsdelivr.net/npm//vega-lite@2.3.0"></script>
+<script src="https://cdn.jsdelivr.net/npm//vega-embed@3.0"></script>
+
+</head>
+<body>
+  <div id="vis"></div>
+  <script type="text/javascript">
+    var spec = {"selection": {"highlight": {"on": "mouseover", "type": "single", "empty": "none"}, "search": {"on": "mouseover", "bind": {"input": "input"}, "type": "single", "empty": "none", "fields": ["term"]}}, "encoding": {"color": {"condition": {"test": "(indexof(lower(datum.cuisine), search.term)>=0) || (highlight._vgsid_==datum._vgsid_)", "value": "SteelBlue"}, "value": "LightGrey"}, "y": {"sort": {"field": "total", "op": "argmax"}, "field": "cuisine", "type": "ordinal"}, "x": {"field": "total", "type": "quantitative", "axis": {"title": "Restaurants"}}}, "data": {"url": "https://raw.githubusercontent.com/hvo/datasets/master/nyc_restaurants_by_cuisine.json"}, "transform": [{"filter": "datum._vgsid_<=25"}], "mark": {"stroke": "Black", "type": "bar"}, "$schema": "https://vega.github.io/schema/vega-lite/v2.3.0.json", "config": {"view": {"width": 400, "height": 300}}};
+    var opt = {"mode": "vega-lite"};
+
+    function showError(el, error){
+        el.innerHTML = ('<div class="error">'
+                        + '<p>JavaScript Error: ' + error.message + '</p>'
+                        + "<p>This usually means there's a typo in your chart specification. "
+                        + "See the javascript console for the full traceback.</p>"
+                        + '</div>');
+        throw error;
+    }
+    const el = document.getElementById('vis');
+    vegaEmbed("#vis", spec, opt)
+      .catch(error => showError(el, error));
+  </script>
+</body>
+</html>
