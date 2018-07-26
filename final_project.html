@@ -1,0 +1,552 @@
+<!--
+Created using JS Bin
+http://jsbin.com
+
+Copyright (c) 2018 by hx517 (http://jsbin.com/vulekok/14/edit)
+
+Released under the MIT license: http://jsbin.mit-license.org
+-->
+<meta name="robots" content="noindex">
+<html>
+  <head>
+<meta name="description" content="typologies filter">
+    <title>Category Filter | CARTO</title>
+    <meta name="viewport" content="initial-scale=1.0">
+    <meta charset="utf-8">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,600,700|Open+Sans:300,400,600" rel="stylesheet">
+    <!-- Include Leaflet -->
+    <script src="https://unpkg.com/leaflet@1.3.1/dist/leaflet.js"></script>
+    <link href="https://unpkg.com/leaflet@1.3.1/dist/leaflet.css" rel="stylesheet">
+    <!-- Include CARTO.js -->
+    <script src="https://libs.cartocdn.com/carto.js/v4.1.1/carto.min.js"></script>
+    <link href="https://carto.com/developers/carto-js/examples/maps/public/style.css" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/vega@3"></script>
+	<script src="https://cdn.jsdelivr.net/npm/vega-lite@2"></script>
+	<script src="https://cdn.jsdelivr.net/npm/vega-embed@3"></script>
+    
+  <!-- Load c3.css -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/c3/0.6.5/c3.css" rel="stylesheet">
+
+<!-- Load d3.js and c3.js -->
+<script src="https://d3js.org/d3.v5.min.js" charset="utf-8"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/c3/0.6.5/c3.min.js"></script>
+    
+  <style id="jsbin-css">
+.box{
+  width:400px;position:absolute;right:0px;top:0px;
+} 
+
+
+.Legend-categoryCircle{
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 5px;
+}
+
+#chart1{
+ position:absolute;left:0px;top:0px;
+}
+
+#chart2{
+ position:absolute;left:200px;top:-140px; 
+}
+
+#chart3{
+ position:absolute;left:0px;top:-140px; 
+}
+#chart4{
+ position:absolute;left:200px;top:-280px; 
+}
+#chart5{
+ position:absolute;left:0px;top:-280px; 
+}
+</style>
+</head>
+  <body>
+    <div id="map"></div>
+    <aside class="toolbox">
+      <div class="box">
+        <header>
+          <h1>Legend</h1>
+          <button class="github-logo js-source-link"></button>
+        </header>
+
+        <section>
+<!--           <p class="description open-sans">Apply a category filter to the listings shown in the visualization.</p> -->
+
+          <div class="separator"></div>
+
+          <section class="usage">
+<!--             <header>USAGE</header>
+            <p class="open-sans">Change the selected displacement types to filter the typologies.</p> -->
+          <div id="controls">
+            <div id="information">
+             Displacement Typolygies
+            </div>
+            <ul>
+<!--                 <input type="checkbox" name="roomTypes[]" id="entire" value="Entire home/apt" checked>
+                <label for="entire">Entire home/apt</label>
+                              </li> -->
+         
+
+              <li>
+                <input type="checkbox" name="roomTypes[]" id="VLI" value="VLI" checked>
+                <span class="Legend-categoryCircle" style="opacity:1; background: url(https://raw.githubusercontent.com/hx517/ADS_project/master/bin/113.png); "></span>
+                <label for="VLI">VLI</label>
+              </li>
+              <li>
+                <input type="checkbox" name="roomTypes[]" id="LIN" value="LI - Not Changing" checked>
+        <span class="Legend-categoryCircle" style="opacity:1; background: #F9D6BD;"></span>
+                <label for="LIN">LI - Not Changing</label>
+                
+              </li>              
+              <li>
+                <input type="checkbox" name="roomTypes[]" id="LIA" value="LI - At Risk of Gentrification" checked>
+                <span class="Legend-categoryCircle" style="opacity:1; background: #FCA265;"></span>
+                <label for="LIA">LI - At Risk of Gentrification</label>
+              </li>
+               <li>
+                 
+                <input type="checkbox" name="roomTypes[]" id="LIO" value="LI - Ongoing Gentrification" checked>
+        <span class="Legend-categoryCircle" style="opacity:1; background: #f35f1b;"></span>
+                <label for="LIO">LI - Ongoing Gentrification</label>
+                 
+              </li>
+              <li>
+                <input type="checkbox" name="roomTypes[]" id="MHA" value="MHI - Advanced Gentrification" checked>
+                <span class="Legend-categoryCircle" style="opacity:1; background: #ee1500;"></span>
+                <label for="MHA">MHI - Advanced Gentrification</label>
+              </li>
+              <li>
+                <input type="checkbox" name="roomTypes[]" id="MHN" value="MHI - Not Changing" checked>
+                <span class="Legend-categoryCircle" style="opacity:1; background: #CBCAE2;"></span>
+                <label for="MHN">MHI - Not Changing</label>
+              </li>
+               <li>
+                <input type="checkbox" name="roomTypes[]" id="MHR" value="MHI - At Risk of Exclusion" checked>
+               <span class="Legend-categoryCircle" style="opacity:1; background: #9F9BCB;"></span> 
+                 <label for="MHR">MHI - At Risk of Exclusion</label>
+              </li>
+              <li>
+                <input type="checkbox" name="roomTypes[]" id="MHE" value="MHI - Exclusion" checked>
+                <span class="Legend-categoryCircle" style="opacity:1; background: #676789;"></span>
+                <label for="MHE">MHI - Exclusion</label>
+              </li>
+              
+            </ul>
+          </div>
+          </section>
+
+          </section>
+          <div id="controls">
+            <div id="info"></div>
+
+            <div id="chart1" ></div>
+            <div id="chart2" ></div>
+            <div id="chart3" ></div>
+            <div id="chart4" ></div>
+            <div id="chart5" ></div>
+        </div>
+        </section>
+
+        <footer class="js-footer"></footer>
+      </div>
+
+      </div>
+    </aside>
+
+    <script>
+<script src="https://fb.me/react-with-addons-15.1.0.js"></script>
+<script src="https://fb.me/react-dom-15.1.0.js"></script>
+
+    </script>
+  <script id="jsbin-javascript">
+      function getSelectedRoomTypes () {
+        const inputControls = document.querySelectorAll('#controls input');
+        const values = [];
+
+        inputControls.forEach(input => input.checked ? values.push(input.value): null);
+        return values;
+      }
+
+      function applyFilters () {
+        roomTypeFilter.setFilters({ in: getSelectedRoomTypes() });
+        // or
+        // roomTypeFilter.set('in', getSelectedRoomTypes());
+      }
+
+      function registerListeners () {
+        document.querySelectorAll('#controls input').forEach(
+          input => input.addEventListener('click', () => applyFilters())
+        );
+      }
+
+      const map = L.map('map').setView([41.2252398976147, -73.659729361534119], 9);
+       map.scrollWheelZoom.enable();
+
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}.png', {
+        maxZoom: 18
+      }).addTo(map);
+
+      const client = new carto.Client({
+        apiKey: 'default_public',
+        username: 'hx517'
+      });
+
+
+
+
+const roomTypeFilter = new carto.filter.Category('typology', { in: getSelectedRoomTypes() });
+
+      const source = new carto.source.Dataset('final_typology');
+      source.addFilter(roomTypeFilter);
+
+      const style = new carto.style.CartoCSS(`
+#layer[typology = null]{
+ polygon-fill:#eaeaea;polygon-opacity: 0.8;
+
+  }
+
+ #layer[typology = 'VLI']{
+ polygon-pattern-file: url(https://raw.githubusercontent.com/hx517/ADS_project/master/bin/113.png);
+   polygon-pattern-opacity:0.9;
+  }
+ #layer[typology = 'VLI']{
+   polygon-fill:#F9D6BD;
+   polygon-opacity: 0.4;
+ }
+ #layer[typology = 'LI - Not Changing']{
+   polygon-fill:#F9D6BD;
+ }
+ #layer[typology = 'LI - At Risk of Gentrification']{
+   polygon-fill:#FCA265;
+ }
+
+ #layer[typology = 'LI - Ongoing Gentrification']{
+   polygon-fill:#f35f1b;
+ }
+
+ #layer[typology = 'MHI - Advanced Gentrification']{
+   polygon-fill:#ee1500; 
+ }
+
+ #layer[typology = 'MHI - Not Changing']{
+   polygon-fill:#CBCAE2; 
+ }
+
+ #layer[typology = 'MHI - At Risk of Exclusion']{
+   polygon-fill:#9F9BCB;
+ }
+
+
+ #layer[typology = 'MHI - Exclusion']{
+   polygon-fill:#676789; 
+ }
+ #layer::outline {
+   line-width: 0.8;
+   line-color: #b1adad;
+   line-opacity: 0.5;
+ }
+      `);
+//             const layer = new carto.layer.Layer(source, style
+//             {
+//          featureClickColumns: ['geoid2', 'typology']
+//             });
+
+//       client.addLayer(layer);
+//       client.getLeafletLayer().addTo(map);
+
+//       registerListeners();
+// //      const layer = new carto.layer.Layer(source, style,
+// //       {
+// //         featureClickColumns: ['geoid2', 'typology']
+// //        );
+// //
+// //       client.addLayer(layer);
+// //       client.getLeafletLayer().addTo(map);
+//          layer.on('featureClicked', featureEvent => {
+//         const content = `
+//   <h3>${featureEvent.data.typology}</h3>
+//           <p class="open-sans"><small>geoID of this CT is </small>${featureEvent.data.geoid2} </p>
+//                    `;
+
+//         document.getElementById('info').innerHTML = content;
+//              });
+// //          
+// //      registerListeners();
+
+      const layer = new carto.layer.Layer(source, style, {
+        featureClickColumns: ['geoid2', 'typology','stcolbl',
+                      'renters__1','change_r_1','total_li_2',
+                      'total_li_0','municipali','collage__1','change_c_1',
+                      'li_mig_in1','li_mig_i_1','median_ren','median_r_3',
+'median_r_4']
+      });
+//note here:renters__1 is renters%_16
+//          change_r_1 is change_renters_00_16
+//          total_li_2 is total_LI_16_%
+//          total_li_0 is total_LI_00_%
+//          collage__1 is collage%_16
+//          change_c_1 is change_col_00_16
+//          li_mig_in1 is LI_mig_in_%_16
+//          li_mig_i_1 is LI_mig_in_%_09
+//          median_ren is median_rent90
+//          median_r_3 is median_rent00
+//          median_r_4 is median_rent16
+
+      client.addLayer(layer);
+      client.getLeafletLayer().addTo(map);
+
+
+
+
+      layer.on('featureClicked', featureEvent => {
+        var dict = {
+  'VLI' : "dana1",
+  'LI - At Risk of Gentrification': "dana2",
+ 'LI - Ongoing Gentrification' : "dana3",
+  'MHI - Advanced Gentrification' : "dana4"};
+        var des = dict[featureEvent.data.typology]
+        const content = `
+          <h4 class="open-sans">Tract ID:  ${featureEvent.data.geoid2} </h4>
+          <h5>Municipality/Neighborhood:${featureEvent.data.municipali}</h5>
+          <p>  ${featureEvent.data.stcolbl} </p> 
+          <h5>Typology:${featureEvent.data.typology}</h5>
+          <p>Description:${des}</p>`;
+// });
+               
+
+}
+
+
+
+
+        
+//change string to number        
+        var renters__1 = parseFloat(featureEvent.data.renters__1.replace(/,/g,''))
+        var change_r_1 = parseFloat(featureEvent.data.change_r_1.replace(/,/g,''))
+        var total_li_2 = parseFloat(featureEvent.data.total_li_2.replace(/,/g,''))
+        var total_li_0 = parseFloat(featureEvent.data.total_li_0.replace(/,/g,''))
+        var collage__1 = parseFloat(featureEvent.data.collage__1.replace(/,/g,''))
+        var change_c_1 = parseFloat(featureEvent.data.change_c_1.replace(/,/g,''))
+        var li_mig_in1 = parseFloat(featureEvent.data.li_mig_in1.replace(/,/g,''))
+        var li_mig_i_1 = parseFloat(featureEvent.data.li_mig_i_1.replace(/,/g,''))
+        var median_ren = parseFloat(featureEvent.data.median_ren.replace(/,/g,''))
+        var median_r_3 = parseFloat(featureEvent.data.median_r_3.replace(/,/g,''))
+        var median_r_4 = parseFloat(featureEvent.data.median_r_4.replace(/,/g,''))
+
+var chart1 = c3.generate({
+  bindto: '#chart1',
+  data: {
+  x:'x',
+   columns: [
+    ['x','2016'],
+    ['% renters', renters__1],
+    [''],
+    ['NY Metro',50]
+  ],
+  type:'bar',
+          colors: {
+            '% renters': '#B0171F',
+            'NY Metro': '#DCDCDC'
+        },
+    },
+  legend: {
+        show: false
+    },
+  axis:{
+  rotated: true,
+      x:{
+      tick:{
+      outer:false,
+      values:['']
+      },
+      label: {
+      text: '% renters',
+      position: 'outer-middle'
+    },
+      },
+      y:{
+     show:false 
+    },
+  },
+    size: {
+                    height: 140,
+                    width: 140,
+          }
+
+});
+
+
+var chart2 = c3.generate({
+  bindto: '#chart2',
+
+  data: {
+  x:'x',
+   columns: [
+    ['x','2016'],
+    ['% LI', total_li_2],
+    [''],
+    ['NY Metro',50]
+  ],
+  type:'bar',
+          colors: {
+            '% LI': '#B0171F',
+            'NY Metro': '#DCDCDC'
+        },
+    },
+  legend: {
+        show: false
+    },
+  axis:{
+  rotated: true,
+      x:{
+      tick:{
+      outer:false,
+      values:['']
+      },
+      label: {
+      text: '% LI',
+      position: 'outer-middle'
+    },
+      },
+      y:{
+     show:false 
+    },
+  },
+    size: {
+                    height: 140,
+                    width: 140,
+          }
+
+});
+
+var chart3 = c3.generate({
+  bindto: '#chart3',
+  data: {
+  x:'x',
+   columns: [
+    ['x','2016'],
+    ['% colloge', collage__1],
+    [''],
+    ['NY Metro',50]
+  ],
+  type:'bar',
+          colors: {
+            '% colloge': '#B0171F',
+            'NY Metro': '#DCDCDC'
+        },
+    },
+  legend: {
+        show: false
+    },
+  axis:{
+  rotated: true,
+      x:{
+      tick:{
+      outer:false,
+      values:['']
+      },
+      label: {
+      text: '% colloge',
+      position: 'outer-middle'
+    },
+      },
+      y:{
+     show:false 
+    },
+  },
+    size: {
+                    height: 140,
+                    width: 140,
+          }
+
+});
+
+var chart4 = c3.generate({
+  bindto: '#chart4',
+  data: {
+  x:'x',
+   columns: [
+    ['x','2016'],
+    ['LI hh migration', li_mig_in1],
+    [''],
+    ['NY Metro',50]
+  ],
+  type:'bar',
+          colors: {
+            'LI hh migration': '#B0171F',
+            'NY Metro': '#DCDCDC'
+        },
+    },
+  legend: {
+        show: false
+    },
+  axis:{
+  rotated: true,
+      x:{
+      tick:{
+      outer:false,
+      values:['']
+      },
+      label: {
+      text: 'LI hh migration',
+      position: 'outer-middle'
+    },
+      },
+      y:{
+     show:false 
+    },
+  },
+    size: {
+                    height: 140,
+                    width: 140,
+          }
+
+});
+
+var chart5 = c3.generate({
+  bindto: '#chart5',
+    data: {
+        x: 'x',
+        columns: [
+            ['x', '1990', '2000', '2016'],
+            ['rent change', median_ren, median_r_3, median_r_4],
+            ['NY Metro',50,30,20]
+        ],
+                  colors: {
+            'rent change': '#B0171F',
+            'NY Metro': '#DCDCDC'
+        },
+    },
+    axis:{
+    y:{
+     show:false 
+    },
+    x:{
+     padding: {
+      left: 2,
+      right: 3
+    }
+    }
+    },
+
+    size: {
+             height: 140,
+             width: 140,
+           }
+});
+
+
+        document.getElementById('info').innerHTML = content;
+      });
+
+
+      
+   registerListeners();
+   console.log(registerListeners())
+</script>
+</body>
+</html>
